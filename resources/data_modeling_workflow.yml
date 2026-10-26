@@ -1,0 +1,45 @@
+resources:
+  jobs:
+    data_modeling_workflow:
+      name: "Data Modeling Workflow"
+      
+      email_notifications:
+        on_failure:
+          - sauravattri23@gmail.com
+        on_success:
+          - sauravattri23@gmail.com
+      
+      tasks:
+        - task_key: data_ingestion
+          description: "Load raw data from source systems"
+          notebook_task:
+            notebook_path: ../src/Bronze.ipynb
+            base_parameters:
+              environment: "dev"
+          timeout_seconds: 3600
+          max_retries: 1
+        
+        - task_key: data_transformation
+          description: "Transform and model ingested data"
+          depends_on:
+            - task_key: data_ingestion
+          notebook_task:
+            notebook_path: ../src/Silver.ipynb
+            base_parameters:
+              environment: "dev"
+          timeout_seconds: 3600
+          max_retries: 1
+        
+        - task_key: dim_fact_analysis
+          description: "Run data quality validations"
+          depends_on:
+            - task_key: data_transformation
+          notebook_task:
+            notebook_path: ../src/Gold.ipynb
+            base_parameters:
+              environment: "dev"
+          timeout_seconds: 3600
+          max_retries: 1
+      
+      max_concurrent_runs: 1
+      timeout_seconds: 14400
